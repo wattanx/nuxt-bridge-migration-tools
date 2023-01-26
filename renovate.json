@@ -5,5 +5,5 @@
   ],
   "enabledManagers": ["npm"],
   "timezone": "Asia/Tokyo",
-  "schedule": ["before 6am on Monday"],
+  "schedule": ["before 6am on Monday"]
 }
