@@ -1,10 +1,18 @@
 {
   "name": "@wattanx/nuxt-bridge-migration",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A tool to support migration to Nuxt Bridge.",
   "main": "dist/index.js",
+  "bin": {
+    "nuxt-bridge-migration": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "test:cli": "node dist/cli.js",
+    "test": "vitest"
   },
   "repository": {
     "type": "git",
@@ -17,11 +25,19 @@
   },
   "homepage": "https://github.com/wattanx/nuxt-bridge-migration-tools#readme",
   "devDependencies": {
-    "@vue/compiler-sfc": "^3.2.45",
+    "@types/cli-progress": "^3.11.0",
+    "@types/node": "^18.11.18",
+    "@types/yargs": "^17.0.20",
     "prettier": "^2.8.3",
-    "ts-morph": "^17.0.1",
     "typescript": "^4.9.4",
     "vite": "^4.0.4",
     "vitest": "^0.28.2"
+  },
+  "dependencies": {
+    "@vue/compiler-sfc": "^3.2.45",
+    "cli-progress": "^3.11.2",
+    "colorette": "^2.0.19",
+    "ts-morph": "^17.0.1",
+    "yargs": "^17.6.2"
   }
 }
