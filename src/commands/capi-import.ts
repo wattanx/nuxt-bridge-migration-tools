@@ -1,18 +1,16 @@
 import { DEFAULT_OPTIONS } from "../lib/constants";
 import type { Arguments, Argv } from "yargs";
 import { green } from "colorette";
-import fs from "fs";
-import { readFile, writeFile } from "fs/promises";
-import { runTransformation } from "vue-codemod";
+import { writeFile } from "fs/promises";
+import runTransformation from "../runTransformation";
 import capiImport from "../transformations/capi-import";
 import { generateProgressBar } from "../lib/generateProgressBar";
+import { convertTargetFiles } from "../lib/convert-target-files";
 
 type Options = {
   targetFilePaths: string[];
   tsconfigPath: string;
 };
-
-const now = Date.now;
 
 export const command = "capi-import [targetFilePaths...]";
 export const desc = "Convert import '@nuxtjs/composition-api'.";
@@ -27,19 +25,25 @@ export const builder = (yargs: Argv<Options>): Argv<Options> =>
   } as const);
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  const start = now();
   const { targetFilePaths } = argv;
-  const progressBar = generateProgressBar(green);
-  progressBar.start(targetFilePaths.length, 0);
 
-  for (const p of targetFilePaths) {
+  const targetFiles = await convertTargetFiles(targetFilePaths);
+
+  const progressBar = generateProgressBar(green);
+  progressBar.start(targetFiles.length, 0);
+
+  for await (const file of targetFiles) {
     const fileInfo = {
-      path: p,
-      source: await readFile(p, "utf8"),
+      path: file.path,
+      source: file.script,
     };
     try {
-      const result = runTransformation(fileInfo, capiImport, {});
-      await writeFile(p, result);
+      const result = runTransformation(fileInfo, capiImport, file.lang, {});
+
+      const newText = file.fullText.replace(file.script, result);
+
+      await writeFile(file.path, newText);
+
       progressBar.increment();
     } catch (e) {
       console.error(e);
@@ -47,8 +51,6 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
     }
   }
   progressBar.stop();
-  const duration = now() - start;
 
   console.log("\nCompleted 🎉");
-  console.log(`Duration: ${duration}ms`);
 };

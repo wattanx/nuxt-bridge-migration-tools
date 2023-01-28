@@ -2,9 +2,6 @@ import jscodeshift, { Transform, Parser } from "jscodeshift";
 // @ts-ignore
 import getParser from "jscodeshift/src/getParser";
 
-import { parse, SFCDescriptor } from "@vue/compiler-sfc";
-import { stringify } from "./lib/stringifySFC";
-
 type FileInfo = {
   path: string;
   source: string;
@@ -26,6 +23,7 @@ type TransformationModule = JSTransformationModule;
 export default function runTransformation(
   fileInfo: FileInfo,
   transformationModule: TransformationModule,
+  lang: string,
   params: object = {}
 ) {
   let transformation: JSTransformation;
@@ -38,27 +36,11 @@ export default function runTransformation(
     transformation = transformationModule;
   }
 
-  const { path, source } = fileInfo;
-  const extension = (/\.([^.]*)$/.exec(path) || [])[0];
-  // @ts-ignore
-  let lang = extension.slice(1);
-
-  let descriptor: SFCDescriptor;
-  if (extension === ".vue") {
-    descriptor = parse(source, { filename: path }).descriptor;
-
-    // skip .vue files without script block
-    if (!descriptor.script) {
-      return source;
-    }
-
-    lang = descriptor.script.lang || "js";
-    fileInfo.source = descriptor.script.content;
-  }
+  const { source } = fileInfo;
 
   let parser = getParser();
   let parserOption = (transformationModule as JSTransformationModule).parser;
-  // force inject `parser` option for .tsx? files, unless the module specifies a custom implementation
+
   if (typeof parserOption !== "object") {
     if (lang.startsWith("ts")) {
       parserOption = lang;
@@ -81,15 +63,6 @@ export default function runTransformation(
   const out = transformation(fileInfo, api, params);
   if (!out) {
     return source;
-  }
-
-  if (extension === ".vue") {
-    if (out === descriptor!.script!.content) {
-      return source;
-    }
-
-    descriptor!.script!.content = out;
-    return stringify(descriptor!);
   }
 
   return out;
