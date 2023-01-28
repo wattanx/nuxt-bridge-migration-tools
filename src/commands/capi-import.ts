@@ -1,6 +1,5 @@
 import { DEFAULT_OPTIONS } from "../lib/constants";
 import type { Arguments, Argv } from "yargs";
-import { capiHanler } from "../handlers/capi-handler";
 import { green } from "colorette";
 import fs from "fs";
 import { runTransformation } from "vue-codemod";
@@ -11,6 +10,8 @@ type Options = {
   targetFilePaths: string[];
   tsconfigPath: string;
 };
+
+const now = Date.now;
 
 export const command = "capi-import [targetFilePaths...]";
 export const desc = "Convert import '@nuxtjs/composition-api'.";
@@ -25,12 +26,11 @@ export const builder = (yargs: Argv<Options>): Argv<Options> =>
   } as const);
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
-  console.time("executionTime");
+  const start = now();
   const { targetFilePaths } = argv;
   const progressBar = generateProgressBar(green);
   progressBar.start(targetFilePaths.length, 0);
 
-  let convertedCount = 0;
   for (const p of targetFilePaths) {
     const fileInfo = {
       path: p,
@@ -39,15 +39,14 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
     try {
       const result = runTransformation(fileInfo, capiImport, {});
       fs.writeFileSync(p, result);
-      convertedCount += 1;
       progressBar.increment();
     } catch (e) {
       console.error(e);
     }
   }
   progressBar.stop();
-  console.timeEnd("executionTime");
+  const duration = now() - start;
 
   console.log("\nCompleted 🎉");
-  console.log(`${green(convertedCount)} files changed.`);
+  console.log(`\nDuration: ${duration}ms`);
 };
