@@ -6,7 +6,11 @@ export const convertTargetFiles = async (targetFilePaths: string[]) => {
     targetFilePaths.map(async (path) => {
       const fullText = await readFile(path, "utf8");
       const descriptor = parse(fullText).descriptor;
-      const script = descriptor.script?.content ?? "";
+
+      const extension = (/\.([^.]*)$/.exec(path) || [])[0];
+
+      const script =
+        extension === ".vue" ? descriptor.script?.content ?? "" : fullText;
       const lang = descriptor.script?.lang ?? "js";
       return {
         path,

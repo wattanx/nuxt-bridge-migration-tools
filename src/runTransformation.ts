@@ -38,6 +38,10 @@ export default function runTransformation(
 
   const { source } = fileInfo;
 
+  if (source === "") {
+    return source;
+  }
+
   let parser = getParser();
   let parserOption = (transformationModule as JSTransformationModule).parser;
 
