@@ -2,6 +2,7 @@ import { DEFAULT_OPTIONS } from "../lib/constants";
 import type { Arguments, Argv } from "yargs";
 import { green } from "colorette";
 import fs from "fs";
+import { readFile, writeFile } from "fs/promises";
 import { runTransformation } from "vue-codemod";
 import capiImport from "../transformations/capi-import";
 import { generateProgressBar } from "../lib/generateProgressBar";
@@ -34,11 +35,11 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
   for (const p of targetFilePaths) {
     const fileInfo = {
       path: p,
-      source: fs.readFileSync(p).toString(),
+      source: await readFile(p, "utf8"),
     };
     try {
       const result = runTransformation(fileInfo, capiImport, {});
-      fs.writeFileSync(p, result);
+      await writeFile(p, result);
       progressBar.increment();
     } catch (e) {
       console.error(e);
@@ -48,5 +49,5 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
   const duration = now() - start;
 
   console.log("\nCompleted 🎉");
-  console.log(`\nDuration: ${duration}ms`);
+  console.log(`Duration: ${duration}ms`);
 };
