@@ -43,6 +43,7 @@ export const handler = async (argv: Arguments<Options>): Promise<void> => {
       progressBar.increment();
     } catch (e) {
       console.error(e);
+      process.exit(1);
     }
   }
   progressBar.stop();
