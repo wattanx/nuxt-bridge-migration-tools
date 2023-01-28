@@ -21,9 +21,11 @@ export const builder = (yargs: Argv<Options>): Argv<Options> =>
   } as const);
 
 export const handler = async (argv: Arguments<Options>): Promise<void> => {
+  console.time("executionTime");
   const { targetFilePaths, tsconfigPath } = argv;
   const { convertedCount } = await capiHanler(targetFilePaths, tsconfigPath);
 
+  console.timeEnd("executionTime");
   console.log("\nCompleted 🎉");
   console.log(`${green(convertedCount)} files changed.`);
 };
