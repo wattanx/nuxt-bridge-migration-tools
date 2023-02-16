@@ -1,3 +1,5 @@
+This repository has been moved [here](https://github.com/wattanx/wattanx-converter/tree/main/packages/nuxt-bridge-migration-tools).
+
 # nuxt-bridge-migration-tools
 
 A tool to support migration to Nuxt Bridge.
